@@ -97,10 +97,18 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 ```mermaid
 graph TD
-    A[Client Application<br/>Chat UI / Python SDK] -->|1. Sends Prompt| B[Gateway Proxy<br/>FastAPI]
-    B -->|2. Checks Similarity| C[(Semantic Cache<br/>Redis)]
-    B -->|3. Classifies Complexity| D[ML Router<br/>DistilBERT / ONNX]
-    B -->|4. Forwards Request| E[Upstream Providers<br/>OpenAI, NVIDIA NIM, Local]
+    %% Define downward links first to force A, C, and D to the top row
+    A[Client Application<br/>Chat UI / Python SDK] -->|sends user prompt| B[Gateway Proxy<br/>FastAPI]
+    C[(Semantic Cache<br/>Redis)] -.->|returns cached response| B
+    D[ML Router<br/>DistilBERT / ONNX] -.->|returns predicted tier| B
+    
+    %% Gateway sends requests up to Cache/Router (arrows point up)
+    B -->|1. checks similarity| C
+    B -->|2. classifies complexity| D
+    
+    %% Gateway forwards to Upstream (bottom row)
+    B -->|3. streams request| E[Upstream Providers<br/>OpenAI, NVIDIA NIM, Local]
+    E -.->|returns tokens| B
 ```
 
 1. **Frontend / UI:** Vanilla JS, CSS Glassmorphism interacting via REST.

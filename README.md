@@ -95,6 +95,17 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 ## 🏗️ Project Architecture
 
+```mermaid
+graph TD
+    A[Client Application<br/>Chat UI / Python SDK] -->|sends user prompt| B[Gateway Proxy<br/>FastAPI]
+    B -->|1. checks similarity| C[(Semantic Cache<br/>Redis)]
+    C -.->|returns cached response| B
+    B -->|2. classifies complexity| D[ML Router<br/>DistilBERT / ONNX]
+    D -.->|returns predicted tier| B
+    B -->|3. streams request| E[Upstream Providers<br/>OpenAI, NVIDIA NIM, Local]
+    E -.->|returns tokens| B
+```
+
 1. **Frontend / UI:** Vanilla JS, CSS Glassmorphism interacting via REST.
 2. **FastAPI Gateway:** Handles SSE streaming chunking, timeouts, and request parsing.
 3. **RouterClient (`router_client.py`):** The brain of the operation. It uses regex heuristics and ONNX-based ML models to calculate prompt complexity probabilities.

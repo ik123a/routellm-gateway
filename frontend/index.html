@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RouteLLM Gateway</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Header -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <h1>RouteLLM</h1>
+            </div>
+            <p class="subtitle">Dynamic Model Router</p>
+
+            <div class="stats-panel">
+                <h3>Session Stats</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Requests</span>
+                    <span class="stat-value" id="stat-requests">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Estimated Cost</span>
+                    <span class="stat-value highlight" id="stat-cost">$0.00000</span>
+                </div>
+                <div class="tier-bars">
+                    <div class="tier-bar-row">
+                        <span class="tier-label">CHEAP</span>
+                        <div class="tier-track"><div class="tier-fill cheap" id="bar-cheap" style="width: 0%"></div></div>
+                    </div>
+                    <div class="tier-bar-row">
+                        <span class="tier-label">MEDIUM</span>
+                        <div class="tier-track"><div class="tier-fill medium" id="bar-medium" style="width: 0%"></div></div>
+                    </div>
+                    <div class="tier-bar-row">
+                        <span class="tier-label">STRONG</span>
+                        <div class="tier-track"><div class="tier-fill strong" id="bar-strong" style="width: 0%"></div></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="cache-toggle-wrapper">
+                <label class="switch">
+                    <input type="checkbox" id="stream-toggle" checked>
+                    <span class="slider round"></span>
+                </label>
+                <span class="toggle-label">Enable Streaming</span>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-container">
+            <div class="chat-history" id="chat-history">
+                <!-- Welcome Message -->
+                <div class="message system-message">
+                    <div class="avatar">⚡</div>
+                    <div class="message-content">
+                        <p>Welcome to RouteLLM-Gateway. Ask me anything, and I'll route your request to the most cost-effective tier!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-wrapper glass">
+                    <textarea id="prompt-input" placeholder="Message RouteLLM..." rows="1"></textarea>
+                    <button id="send-btn" class="send-btn" aria-label="Send">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="footer-text">RouteLLM dynamically selects models to optimize accuracy and cost.</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

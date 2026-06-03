@@ -16,7 +16,8 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from gateway.cache import SemanticCache
@@ -96,6 +97,14 @@ app.add_middleware(
 app.add_middleware(StructuredLoggingMiddleware)
 app.add_middleware(RequestIDMiddleware)
 
+# Mount static frontend
+import os
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+@app.get("/")
+async def serve_ui():
+    """Serve the frontend chat interface."""
+    return FileResponse("frontend/index.html")
 
 # ---------------------------------------------------------------------------
 # Request / Response schemas (OpenAI-compatible)

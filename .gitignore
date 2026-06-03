@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+
+# Model Checkpoints
+router/checkpoints/*.onnx
+router/checkpoints/*.pt
+router/checkpoints/*.bin
+
+# Data
+data/
+*.csv
+*.jsonl
+*.parquet
+
+# Logs
+logs/
+*.log
+
+# WandB
+wandb/
+
+# OS
+.DS_Store
+Thumbs.db

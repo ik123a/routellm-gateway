@@ -31,12 +31,20 @@ def _build_openai_headers() -> dict[str, str]:
     }
 
 
+def _build_nvidia_headers() -> dict[str, str]:
+    return {
+        "Authorization": f"Bearer {settings.nvidia_api_key}",
+        "Content-Type": "application/json",
+    }
+
+
 def _build_local_headers() -> dict[str, str]:
     return {"Content-Type": "application/json"}
 
 
 PROVIDER_ENDPOINTS = {
     "openai": "https://api.openai.com/v1/chat/completions",
+    "nvidia": "https://integrate.api.nvidia.com/v1/chat/completions",
     "local": f"{settings.local_model_base_url}/chat/completions",
 }
 
@@ -85,6 +93,8 @@ class ProxyResult:
 def _get_headers(provider: str) -> dict[str, str]:
     if provider == "openai":
         return _build_openai_headers()
+    elif provider == "nvidia":
+        return _build_nvidia_headers()
     return _build_local_headers()
 
 

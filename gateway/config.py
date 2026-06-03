@@ -50,6 +50,15 @@ MODEL_REGISTRY: dict[str, dict] = {
         "max_tokens": 16384,
         "supports_streaming": True,
     },
+    "llama3-70b-nvidia": {
+        "tier": ModelTier.MEDIUM,
+        "provider": "nvidia",
+        "model_id": "meta/llama3-70b-instruct",
+        "cost_per_1k_input": 0.00088,   # $0.88 / 1M input on NVIDIA NIM
+        "cost_per_1k_output": 0.00088,
+        "max_tokens": 8192,
+        "supports_streaming": True,
+    },
     # ---- Tier 2: Strong ----
     "gpt-4o": {
         "tier": ModelTier.STRONG,
@@ -96,6 +105,7 @@ class Settings(BaseSettings):
     # --- API Keys ---
     openai_api_key: str = Field(default="", description="OpenAI API key")
     anthropic_api_key: str = Field(default="", description="Anthropic API key")
+    nvidia_api_key: str = Field(default="", description="NVIDIA API key for NIM endpoints")
 
     # --- Local Model ---
     local_model_base_url: str = Field(

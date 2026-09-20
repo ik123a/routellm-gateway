@@ -41,3 +41,27 @@ wandb/
 # OS
 .DS_Store
 Thumbs.db
+
+# Auto-added safety ignores for large files and temp data
+node_modules/
+*.pyc
+*.pyo
+.next/
+.gradle/
+local.properties
+*.iml
+.idea/libraries/
+.idea/caches/
+*.h5
+*.gguf
+*.zst
+*.tar.gz
+*.iso
+*.vmdk
+*.dll
+*.exe
+*.zip
+*.7z
+*.rar
+.pytest_cache/
+.turbo/

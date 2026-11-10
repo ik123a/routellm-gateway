@@ -120,7 +120,7 @@ class Settings(BaseSettings):
     redis_db: int = Field(default=0)
 
     # --- Gateway ---
-    gateway_host: str = Field(default="0.0.0.0")
+    gateway_host: str = Field(default="127.0.0.1")
     gateway_port: int = Field(default=8000)
     log_level: str = Field(default="info")
     dev_mode: bool = Field(

@@ -1,14 +1,4 @@
 
-function setHTML(element, htmlString) {
-  if (!element) return;
-  element.textContent = '';
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlString, 'text/html');
-  while (doc.body.firstChild) {
-    element.appendChild(doc.body.firstChild);
-  }
-}
-
 // DOM Elements
 const chatHistory = document.getElementById('chat-history');
 const promptInput = document.getElementById('prompt-input');
@@ -105,7 +95,7 @@ async function sendMessage() {
                             const data = JSON.parse(line.slice(6));
                             if (data.choices && data.choices[0].delta.content) {
                                 fullText += data.choices[0].delta.content;
-                                setHTML(contentDiv, marked.parse(fullText));
+                                contentDiv.textContent = fullText;
                                 chatHistory.scrollTop = chatHistory.scrollHeight;
                             }
                         } catch (e) {
@@ -118,7 +108,7 @@ async function sendMessage() {
             // Non-streaming JSON response
             const data = await response.json();
             fullText = data.choices[0].message.content;
-            setHTML(contentDiv, marked.parse(fullText));
+            contentDiv.textContent = fullText;
             
             // Extract _routellm metadata
             const meta = data._routellm || {};
@@ -138,7 +128,7 @@ async function sendMessage() {
         updateStats(tier);
 
     } catch (error) {
-        setHTML(contentDiv, `<p style="color: #ef4444;">Error: ${error.message}</p>`);
+        contentDiv.textContent = `Error: ${error.message}`;
     } finally {
         isGenerating = false;
         sendBtn.disabled = false;
@@ -153,12 +143,16 @@ function appendMessage(role, text, id = null) {
     
     const icon = role === 'user' ? '👤' : '⚡';
     
-    setHTML(div, `
-        <div class="avatar">${icon}</div>
-        <div class="message-wrapper">
-            <div class="message-content">${marked.parse(text)}</div>
-        </div>
-    `);
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = icon;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'message-wrapper';
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    content.textContent = text;
+    wrapper.appendChild(content);
+    div.append(avatar, wrapper);
     
     chatHistory.appendChild(div);
     chatHistory.scrollTop = chatHistory.scrollHeight;
@@ -178,11 +172,16 @@ function appendRoutingMeta(msgId, tier, latency, modelUsed) {
     const tierLower = tier.toLowerCase();
     const badgeClass = tierLower === 'cached' ? 'badge cached' : `badge tier-${tierLower}`;
     
-    setHTML(metaDiv, `
-        <span class="${badgeClass}">Tier: ${tier}</span>
-        <span class="meta-detail">Latency: ${latency}ms</span>
-        <span class="meta-detail">Model: ${modelUsed}</span>
-    `);
+    for (const [className, text] of [
+        [badgeClass, `Tier: ${tier}`],
+        ['meta-detail', `Latency: ${latency}ms`],
+        ['meta-detail', `Model: ${modelUsed}`],
+    ]) {
+        const span = document.createElement('span');
+        span.className = className;
+        span.textContent = text;
+        metaDiv.appendChild(span);
+    }
     
     wrapper.appendChild(metaDiv);
     chatHistory.scrollTop = chatHistory.scrollHeight;

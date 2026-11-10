@@ -35,7 +35,7 @@ class SemanticCache:
                         using cosine similarity.
     """
 
-    def __init__(self):
+    def __init__(self, *, semantic_enabled: bool = True):
         self._redis = None
         self._embedder = None
         self._enabled = settings.cache_enabled
@@ -44,7 +44,8 @@ class SemanticCache:
 
         if self._enabled:
             self._connect_redis()
-            self._load_embedder()
+            if semantic_enabled:
+                self._load_embedder()
 
     def _connect_redis(self):
         """Attempt to connect to Redis. Disable cache on failure."""

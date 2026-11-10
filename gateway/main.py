@@ -15,7 +15,6 @@ from contextlib import asynccontextmanager
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -58,7 +57,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"Router mode: {router_client.mode}")
 
     # Initialize the semantic cache
-    cache = SemanticCache()
+    cache = SemanticCache(semantic_enabled=False)
     logger.info(f"Cache available: {cache.is_available}")
 
     logger.info(f"Registered models: {list(MODEL_REGISTRY.keys())}")
@@ -83,14 +82,6 @@ app = FastAPI(
     ),
     version="0.1.0",
     lifespan=lifespan,
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
 )
 
 # Request tracing and structured logging
@@ -120,7 +111,7 @@ class ChatCompletionRequest(BaseModel):
         default="auto",
         description="Model name or 'auto' for dynamic routing",
     )
-    messages: list[ChatMessage]
+    messages: list[ChatMessage] = Field(..., min_length=1)
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     max_tokens: Optional[int] = Field(default=None, ge=1)
     stream: bool = Field(default=False)
@@ -200,14 +191,15 @@ async def chat_completions(request: ChatCompletionRequest):
 
     messages = [msg.model_dump() for msg in request.messages]
 
-    # ---- Extract user prompt for caching / routing ----
-    user_prompt = " ".join(
-        m["content"] for m in messages if m["role"] == "user"
+    # Match the whole validated request. Prompt-only or approximate matching can
+    # return another conversation's response or ignore model/generation settings.
+    cache_key = "chat-completion:v2:" + json.dumps(
+        request.model_dump(), sort_keys=True, separators=(",", ":")
     )
 
     # ---- Check cache (non-streaming only) ----
     if not request.stream and cache and cache.is_available:
-        cached = cache.get(user_prompt)
+        cached = cache.get_exact(cache_key)
         if cached:
             logger.info("Serving response from cache.")
             # Inject routing metadata
@@ -250,7 +242,7 @@ async def chat_completions(request: ChatCompletionRequest):
         )
     except Exception as e:
         logger.error(f"All upstream providers failed: {e}")
-        raise HTTPException(status_code=502, detail=f"Upstream error: {e}")
+        raise HTTPException(status_code=502, detail="Upstream request failed") from e
 
     _total_cost += result.estimated_cost
 
@@ -299,7 +291,7 @@ async def chat_completions(request: ChatCompletionRequest):
 
         # Cache the response
         if cache and cache.is_available:
-            cache.store(user_prompt, response)
+            cache.set_exact(cache_key, response)
 
     logger.info(
         f"Request complete | {json.dumps(routing_meta)}"
